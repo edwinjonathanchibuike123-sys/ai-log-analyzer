@@ -1,0 +1,6 @@
+INFO: Server started successfully
+WARNING: High memory usage detected
+ERROR: Failed to connect to database
+INFO: Retrying connection
+ERROR: Timeout occurred
+WARNING: Disk space low
