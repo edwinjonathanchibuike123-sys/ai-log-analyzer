@@ -1,33 +1,38 @@
-def analyze_logs(file_path):
-    errors = []
-    warnings = []
-    info = []
+import os
+import requests
+from dotenv import load_dotenv
 
-    with open(file_path, 'r') as file:
-        for line in file:
-            if "ERROR" in line:
-                errors.append(line.strip())
-            elif "WARNING" in line:
-                warnings.append(line.strip())
-            elif "INFO" in line:
-                info.append(line.strip())
+load_dotenv()
 
-    print("\n--- LOG ANALYSIS REPORT ---\n")
-    print(f"Total INFO: {len(info)}")
-    print(f"Total WARNINGS: {len(warnings)}")
-    print(f"Total ERRORS: {len(errors)}\n")
+API_KEY = os.getenv("GROQ_API_KEY")
 
-    if len(errors) > 0:
-        print("ALERT: Critical issues detected!\n")
+def read_logs(file_path):
+    with open(file_path, "r") as f:
+        return f.read()
 
-    print("Errors:")
-    for e in errors:
-        print(f"- {e}")
+def analyze_with_ai(log_content):
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": "llama-3.3-70b-versatile",
+        "messages": [
+            {
+                "role": "user",
+                "content": f"You are a DevOps engineer. Analyze these logs, identify errors, and give a short incident report:\n\n{log_content}"
+            }
+        ]
+    }
+    response = requests.post(
+        "https://api.groq.com/openai/v1/chat/completions",
+        headers=headers,
+        json=payload
+    )
+    result = response.json()
+    print("RAW:", result)
+    return result["choices"][0]["message"]["content"]
 
-    print("\nWarnings:")
-    for w in warnings:
-        print(f"- {w}")
-
-
-if __name__ == "__main__":
-    analyze_logs("sample.log")
+logs = read_logs("sample.log")
+print("=== AI INCIDENT REPORT ===")
+print(analyze_with_ai(logs))
