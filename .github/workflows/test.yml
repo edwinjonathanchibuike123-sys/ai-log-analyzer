@@ -14,4 +14,6 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Run log analyzer
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: python app.py
